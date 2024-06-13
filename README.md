@@ -68,6 +68,7 @@ make study=vbsvvhjets
 ```
 
 ### 8. Run the code (writes babies)
+The command below will write babies (ROOT files with TTrees) to `/data/userdata/$USER/vbs_studies/vbsvvhjets/output_TestRun` using 64 parallel threads.
 ```bash
 ./bin/run vbsvvhjets --n_workers=64 --basedir=/data/userdata/$USER/vbs_studies --skimdir=/ceph/cms/store/user/jguiang/VBSVVHSkim --skimtag=0lep_2ak4_2ak8_ttH --data --tag=TestRun
 ```
@@ -87,12 +88,15 @@ pip install yahist
 ```
 
 ### 11. Make plots
+The command below will create plots in `$HOME/public_html/vbsvvhjets_plots/TestRun/`. You can use the `--help` flag to see all available options.
 ```bash
 export PYTHONPATH=${PYTHONPATH}:$PWD
 python scripts/make_plots_vbsvvh.py TestRun --allmerged # use --semimerged for semi-merged channel
 ```
 
 ### 12. Running the full workflow (nominal + all JEC/JER variations)
+The command below will write babies (ROOT files with TTrees) to `/data/userdata/$USER/vbs_studies/vbsvvhjets/output_v1` using 64 parallel threads. 
+A different output directory is populated for each JEC and JER variation.
 ```bash
 sh scripts/runall_vbsvvhjets.sh v1 # v1 can be any string for tag
 ```
@@ -130,7 +134,7 @@ cd ../../
 ### 15. Run the final limits and create the plots
 ```bash
 cd vbsvvh
-sh runLimits.sh datacards/VBSVVH_allmerged_v1
+sh runLimits.sh datacards/VBSVVH_allmerged_v1 # results written to results/VBSVVH_allmerged_v1
 sh plotLimits.sh results/VBSVVH_allmerged_v1
 ```
     
