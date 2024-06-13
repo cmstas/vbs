@@ -89,7 +89,7 @@ pip install yahist
 ### 11. Make plots
 ```bash
 export PYTHONPATH=${PYTHONPATH}:$PWD
-python scripts/make_plots_vbsvvh.py TestRun
+python scripts/make_plots_vbsvvh.py TestRun --allmerged # use --semimerged for semi-merged channel
 ```
 
 ### 12. Running the full workflow (nominal + all JEC/JER variations)
@@ -98,8 +98,13 @@ sh scripts/runall_vbsvvhjets.sh v1 # v1 can be any string for tag
 ```
 
 ### 13. Creating the data cards
+The following command will create datacards in `../combine/vbsvvh/datacards/VBSVVH_allmerged_v1`:
 ```bash
-python scripts/make_datacards_vbsvvh.py v1
+python scripts/make_datacards_vbsvvh.py v1 --allmerged # use --semimerged for semi-merged channel
+```
+Alternatively, the private samples (C2W, C2Z scan) can be used, and datacards will instead be written to `../combine/vbsvvh/datacards/Private_C2W_C2Z_allmerged_v1`:
+```bash
+python scripts/make_datacards_vbsvvh.py v1 --private --allmerged # use --semimerged for semi-merged channel
 ```
 
 ### 14. Setting up Higgs combine (in a different terminal)
