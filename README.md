@@ -45,7 +45,7 @@ make -j
 cd -
 ```
 
-### 6. Setup NanoTools (and make some modifications)
+### 6. Set up NanoTools (and make some modifications)
 Eventually, we will create a branch of [NanoTools](https://github.com/cmstas/NanoTools) that has these changes. 
 The changes below primarily add the branches needed to read the custom branch that we add for the ttH lepton ID MVA for NanoAOD v9. 
 ```bash
@@ -70,7 +70,7 @@ make study=vbsvvhjets
 ### 8. Run the code (writes babies)
 The command below will write babies (ROOT files with TTrees) to `/data/userdata/$USER/vbs_studies/vbsvvhjets/output_TestRun` using 64 parallel threads.
 ```bash
-./bin/run vbsvvhjets --n_workers=64 --basedir=/data/userdata/$USER/vbs_studies --skimdir=/ceph/cms/store/user/jguiang/VBSVVHSkim --skimtag=0lep_2ak4_2ak8_ttH --data --tag=TestRun
+./bin/run vbsvvhjets --n_workers=64 --basedir=/data/userdata/$USER/vbs_studies --skimdir=/data/userdata/$USER/nanoaod/VBSVVHSkim --skimtag=0lep_2ak4_2ak8_ttH --data --tag=TestRun
 ```
 
 ### 9. Merge the output (contains TTree)
