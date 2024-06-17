@@ -506,10 +506,6 @@ public:
         Doubles good_fatjet_xwqqtags;
         Doubles good_fatjet_xvqqtags;
         Doubles good_fatjet_masses;
-        Doubles good_fatjet_masses_scaleUp;
-	Doubles good_fatjet_masses_scaleDown;
-	Doubles good_fatjet_masses_smearUp;
-	Doubles good_fatjet_masses_smearDown;
         Doubles good_fatjet_msoftdrops;
         double ht = 0.;
         LorentzVectors veto_lep_p4s = globals.getVal<LorentzVectors>("veto_lep_p4s");
