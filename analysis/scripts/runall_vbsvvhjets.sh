@@ -33,6 +33,32 @@ done
 ./bin/merge_vbsvvhjets vbsvvhjets --basedir=$BASEDIR --tag=${TAG}_jer_up
 ./bin/merge_vbsvvhjets vbsvvhjets --basedir=$BASEDIR --tag=${TAG}_jer_dn
 
+
+##JMR
+./bin/run vbsvvhjets --n_workers=$N_WORKERS --basedir=$BASEDIR --skimdir=$SKIMDIR --tag=${TAG}_jmr_up --var=jmr_up --no_make --skims sig_$SKIMTAG
+./bin/run vbsvvhjets --n_workers=$N_WORKERS --basedir=$BASEDIR --skimdir=$SKIMDIR --tag=${TAG}_jmr_dn --var=jmr_dn --no_make --skims sig_$SKIMTAG
+
+for VARDIR in $BASEDIR/vbsvvhjets/output_${TAG}_jmr*; do
+    cp -R -n $BASEDIR/vbsvvhjets/output_${TAG}/* $VARDIR/
+done
+
+./bin/merge_vbsvvhjets vbsvvhjets --basedir=$BASEDIR --tag=${TAG}_jmr_up
+./bin/merge_vbsvvhjets vbsvvhjets --basedir=$BASEDIR --tag=${TAG}_jmr_dn
+
+
+##JMS
+./bin/run vbsvvhjets --n_workers=$N_WORKERS --basedir=$BASEDIR --skimdir=$SKIMDIR --tag=${TAG}_jms_up --var=jms_up --no_make --skims sig_$SKIMTAG
+./bin/run vbsvvhjets --n_workers=$N_WORKERS --basedir=$BASEDIR --skimdir=$SKIMDIR --tag=${TAG}_jms_dn --var=jms_dn --no_make --skims sig_$SKIMTAG
+
+for VARDIR in $BASEDIR/vbsvvhjets/output_${TAG}_jms*; do
+    cp -R -n $BASEDIR/vbsvvhjets/output_${TAG}/* $VARDIR/
+done
+
+./bin/merge_vbsvvhjets vbsvvhjets --basedir=$BASEDIR --tag=${TAG}_jms_up
+./bin/merge_vbsvvhjets vbsvvhjets --basedir=$BASEDIR --tag=${TAG}_jms_dn
+
+
+
 # Run all 22 JEC variations (11 sources x 2 for up/down)... but only for signal (since we don't need them for bkg)!
 ./bin/run vbsvvhjets --n_workers=$N_WORKERS --basedir=$BASEDIR --skimdir=$SKIMDIR --tag=${TAG}_jec_1_up --var=jec_1_up   --no_make --skims sig_$SKIMTAG
 ./bin/run vbsvvhjets --n_workers=$N_WORKERS --basedir=$BASEDIR --skimdir=$SKIMDIR --tag=${TAG}_jec_1_dn --var=jec_1_dn   --no_make --skims sig_$SKIMTAG

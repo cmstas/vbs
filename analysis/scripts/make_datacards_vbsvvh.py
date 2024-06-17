@@ -445,6 +445,36 @@ if __name__ == "__main__":
         # --------------------------------------------------------------------------------------
 
 
+        # -- Jet energy resolution uncertainty -------------------------------------------------
+        jmr_systs = get_jet_energy_systs(
+            f"{BABYDIR}/Run2/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jmr_up/Run2/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jmr_dn/Run2/VBSVVH_cutflow.cflow",
+            {
+                "regionA": "AllMerged_RegionA",
+                "regionB": "AllMerged_RegionB",
+                "regionC": "AllMerged_RegionC",
+                "regionD": "AllMerged_RegionD",
+            },
+            "CMS_jmr_pnetreg_13TeV"
+        )
+        SIG_SYSTS_LIMIT.add_row(jmr_systs)
+        # --------------------------------------------------------------------------------------
+        jms_systs = get_jet_energy_systs(
+            f"{BABYDIR}/Run2/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jms_up/Run2/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jms_dn/Run2/VBSVVH_cutflow.cflow",
+            {
+                "regionA": "AllMerged_RegionA",
+                "regionB": "AllMerged_RegionB",
+                "regionC": "AllMerged_RegionC",
+                "regionD": "AllMerged_RegionD",
+            },
+            "CMS_jms_pnetreg_13TeV"
+        )
+        SIG_SYSTS_LIMIT.add_row(jms_systs)
+        # --------------------------------------------------------------------------------------
+
         # -- Luminosity ------------------------------------------------------------------------
         lumi_systs = Systematic("lumi_13TeV_correlated", ABCD_REGIONS)
         lumi_systs.add_systs([0.016 for R in ABCD_REGIONS])

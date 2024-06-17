@@ -11,6 +11,7 @@
 #include "core/collections.h"   // Core::Core::Analysis, Core::Skimmer
 #include "core/pku.h"           // PKU::IDLevel, PKU::passesElecID, PKU::passesMuonID
 #include "corrections/all.h"    // PileUpSFs, LeptonSFsTTH/PKU, BTagSFs, JetEnergyScales
+#include "corrections/particlenet_mreg.h"
 // ROOT
 #include "TString.h"
 #include "Math/VectorUtil.h"    // DeltaR
@@ -297,7 +298,7 @@ public:
             */
             // New HEM prescription
             if (nt.year() == 2018
-                && ((nt.isData() && nt.run() > 319077) || (!nt.isData() && nt.event() % 1961 < 1286))
+                && ((nt.isData() && nt.run() >= 319077) || (!nt.isData() && nt.event() % 1961 < 1286))
                 && jet_p4.pt() > 15
                 && jet_p4.phi() > -1.57 && jet_p4.phi() < -0.87
                 && jet_p4.eta() > -3.20 && jet_p4.eta() < -1.30)
@@ -505,6 +506,10 @@ public:
         Doubles good_fatjet_xwqqtags;
         Doubles good_fatjet_xvqqtags;
         Doubles good_fatjet_masses;
+        Doubles good_fatjet_masses_scaleUp;
+	Doubles good_fatjet_masses_scaleDown;
+	Doubles good_fatjet_masses_smearUp;
+	Doubles good_fatjet_masses_smearDown;
         Doubles good_fatjet_msoftdrops;
         double ht = 0.;
         LorentzVectors veto_lep_p4s = globals.getVal<LorentzVectors>("veto_lep_p4s");
@@ -554,6 +559,9 @@ public:
             double pnet_xcc = nt.FatJet_particleNetMD_Xcc().at(fatjet_i);
             double pnet_qcd = nt.FatJet_particleNetMD_QCD().at(fatjet_i);
 
+	    double pnet_mass = nt.FatJet_particleNet_mass().at(fatjet_i);
+            if (!nt.isData()) pnet_mass = jms_jmr(pnet_mass, nt.luminosityBlock(), nt.event(), (nt.year() == 2016 && gconf.isAPV) ? -nt.year() : nt.year(), cli.variation); 
+
             // Store good fat jets
             good_fatjet_p4s.push_back(fatjet_p4);
             good_fatjet_idxs.push_back(fatjet_i);
@@ -565,7 +573,7 @@ public:
             good_fatjet_xcctags.push_back(pnet_xcc/(pnet_xcc + pnet_qcd));
             good_fatjet_xwqqtags.push_back((pnet_xcc + pnet_xqq)/(pnet_xcc + pnet_xqq + pnet_qcd));
             good_fatjet_xvqqtags.push_back((pnet_xbb + pnet_xcc + pnet_xqq)/(pnet_xbb + pnet_xcc + pnet_xqq + pnet_qcd));
-            good_fatjet_masses.push_back(nt.FatJet_particleNet_mass().at(fatjet_i));
+            good_fatjet_masses.push_back(pnet_mass); //nt.FatJet_particleNet_mass().at(fatjet_i));
             good_fatjet_msoftdrops.push_back(nt.FatJet_msoftdrop().at(fatjet_i));
             ht += fatjet_p4.pt();
         }
