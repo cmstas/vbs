@@ -85,8 +85,8 @@ def get_jet_energy_systs(nominal_cflow, up_cflow, dn_cflow, signal_regions, name
     for SR, cut_name in signal_regions.items():
         systs.add_syst(
             max(
-                syst_up_cutflow[cut_name].n_pass,
-                syst_dn_cutflow[cut_name].n_pass
+                abs(syst_up_cutflow[cut_name].n_pass),
+                abs(syst_dn_cutflow[cut_name].n_pass)
             ),
             signal_region=SR
         )
