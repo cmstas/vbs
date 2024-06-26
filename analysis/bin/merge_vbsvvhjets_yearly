@@ -1,0 +1,182 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*
+import os
+import argparse
+from utils.merge import merge
+import copy
+
+BKG_SAMPLE_MAP = {
+    "SingleTop": {
+        "2016preVFP":  ["ST*"],
+        "2016postVFP": ["ST*"],
+        "2017":        ["ST*"],
+        "2018":        ["ST*"],
+    },
+    "TTHad": {
+        "2016preVFP":  ["TTToHadronic*"],
+        "2016postVFP": ["TTToHadronic*"],
+        "2017":        ["TTToHadronic*"],
+        "2018":        ["TTToHadronic*"],
+    },
+    "QCD": {
+        "2016preVFP":  ["QCD_HT*"],
+        "2016postVFP": ["QCD_HT*"],
+        "2017":        ["QCD_HT*"],
+        "2018":        ["QCD_HT*"],
+    },
+    # "QCD": {
+    #     "2016preVFP":  ["QCD_Pt*"],
+    #     "2016postVFP": ["QCD_Pt*"],
+    #     "2017":        ["QCD_Pt*"],
+    #     "2018":        ["QCD_Pt*"],
+    # },
+    "TT1L": {
+        "2016preVFP":  ["TTToSemiLep*"],
+        "2016postVFP": ["TTToSemiLep*"],
+        "2017":        ["TTToSemiLep*"],
+        "2018":        ["TTToSemiLep*"],
+    },
+    "TTW": {
+        "2016preVFP":  ["TTW*"],
+        "2016postVFP": ["TTW*"],
+        "2017":        ["TTW*"],
+        "2018":        ["TTW*"],
+    },
+    "TTH": {
+        "2016preVFP":  ["ttH*"],
+        "2016postVFP": ["ttH*"],
+        "2017":        ["ttH*"],
+        "2018":        ["ttH*"],
+    },
+    "Bosons": {
+        "2016preVFP":  ["WW*", "WZ*", "ZZ*", "DY*", "EWKW*WToQQ*", "EWKZ*ZToNuNu*", "EWKZ*ZToLL*", "EWKZ*ZToQQ*", "WJets*", "ZJets*", "*HToBB*", "VHToNonbb_M125"],
+        "2016postVFP": ["WW*", "WZ*", "ZZ*", "DY*", "EWKW*WToQQ*", "EWKZ*ZToNuNu*", "EWKZ*ZToLL*", "EWKZ*ZToQQ*", "WJets*", "ZJets*", "*HToBB*", "VHToNonbb_M125"],
+        "2017":        ["WW*", "WZ*", "ZZ*", "DY*", "EWKW*WToQQ*", "EWKZ*ZToNuNu*", "EWKZ*ZToLL*", "EWKZ*ZToQQ*", "WJets*", "ZJets*", "*HToBB*", "VHToNonbb_M125"],
+        "2018":        ["WW*", "WZ*", "ZZ*", "DY*", "EWKW*WToQQ*", "EWKZ*ZToNuNu*", "EWKZ*ZToLL*", "EWKZ*ZToQQ*", "WJets*", "ZJets*", "*HToBB*", "VHToNonbb_M125"],
+    },
+}
+
+SIG_SAMPLE_MAP = {
+    "SSVBSWWH": {
+        "2016preVFP":  ["VBSWWH_SSWW_MJJ-100*"],
+        "2016postVFP": ["VBSWWH_SSWW_MJJ-100*"],
+        "2017":        ["VBSWWH_SSWW_MJJ-100*"],
+        "2018":        ["VBSWWH_SSWW_MJJ-100*"]
+    },
+    "OSVBSWWH": {
+        "2016preVFP":  ["VBSWWH_OSWW_MJJ-100*"],
+        "2016postVFP": ["VBSWWH_OSWW_MJJ-100*"],
+        "2017":        ["VBSWWH_OSWW_MJJ-100*"],
+        "2018":        ["VBSWWH_OSWW_MJJ-100*"]
+    },
+    "VBSWZH": {
+        "2016preVFP":  ["VBSWZH_MJJ-100*"],
+        "2016postVFP": ["VBSWZH_MJJ-100*"],
+        "2017":        ["VBSWZH_MJJ-100*"],
+        "2018":        ["VBSWZH_MJJ-100*"]
+    },
+    "VBSZZH": {
+        "2016preVFP":  ["VBSZZH_MJJ-100*"],
+        "2016postVFP": ["VBSZZH_MJJ-100*"],
+        "2017":        ["VBSZZH_MJJ-100*"],
+        "2018":        ["VBSZZH_MJJ-100*"]
+    },
+}
+
+OTHER_SAMPLE_MAP = {
+    "data": {
+        "2016preVFP":  ["*Run201*"],
+        "2016postVFP": ["*Run201*"],
+        "2017":        ["*Run201*"],
+        "2018":        ["*Run201*"]
+    },
+    "VBSVVH": {
+        "2016preVFP":  ["VBSWWH_SSWW_MJJ-100*", "VBSWWH_OSWW_MJJ-100*", "VBSWZH_MJJ-100*", "VBSZZH_MJJ-100*"],
+        "2016postVFP": ["VBSWWH_SSWW_MJJ-100*", "VBSWWH_OSWW_MJJ-100*", "VBSWZH_MJJ-100*", "VBSZZH_MJJ-100*"],
+        "2017":        ["VBSWWH_SSWW_MJJ-100*", "VBSWWH_OSWW_MJJ-100*", "VBSWZH_MJJ-100*", "VBSZZH_MJJ-100*"],
+        "2018":        ["VBSWWH_SSWW_MJJ-100*", "VBSWWH_OSWW_MJJ-100*", "VBSWZH_MJJ-100*", "VBSZZH_MJJ-100*"]
+    },
+    "Private_C2W_C2Z": {
+        "2016preVFP":  ["Private_C2W_C2Z*"],
+        "2016postVFP": ["Private_C2W_C2Z*"],
+        "2017":        ["Private_C2W_C2Z*"],
+        "2018":        ["Private_C2W_C2Z*"]
+    }
+}
+
+if __name__ == "__main__":
+    cli = argparse.ArgumentParser(description="Run merge results from /bin/run")
+    cli.add_argument(
+        "study", type=str,
+        help="Name of the study to run"
+    )
+    cli.add_argument(
+        "--tag", type=str, default="",
+        help="Unique tag for output"
+    )
+    cli.add_argument(
+        "--terminals", nargs="*",
+        help="Names of terminal cuts in cutflow to write to CSV"
+    )
+    cli.add_argument(
+        "--debug", action="store_true",
+        help="Run in debug mode"
+    )
+    cli.add_argument(
+        "--n_workers", type=int, default=8,
+        help="Number of workers to run hadds"
+    )
+    cli.add_argument(
+        "--basedir", type=str, default="studies",
+        help="Base directory for output"
+    )
+    cli.add_argument(
+        "--year", type=str, default="2018",
+        help="Year"
+    )
+    args = cli.parse_args()
+
+    if args.tag:
+        output_dir=f"{args.basedir}/{args.study}/output_{args.tag}"
+    else:
+        output_dir=f"{args.basedir}/{args.study}/output"
+
+    print(f"{output_dir}/Run2_{args.year}")
+    os.makedirs(f"{output_dir}/Run2_{args.year}", exist_ok=True)
+
+    OTHER_SAMPLE_MAP2=copy.deepcopy(OTHER_SAMPLE_MAP)
+    SIG_SAMPLE_MAP2=copy.deepcopy(SIG_SAMPLE_MAP)
+    BKG_SAMPLE_MAP2=copy.deepcopy(BKG_SAMPLE_MAP)
+    #Reduce sample maps
+    for key in OTHER_SAMPLE_MAP:
+        for secondkey in OTHER_SAMPLE_MAP[key]:
+            if secondkey!=args.year:
+                del OTHER_SAMPLE_MAP2[key][secondkey]
+    for key in SIG_SAMPLE_MAP:
+        for secondkey in SIG_SAMPLE_MAP[key]:
+            if secondkey!=args.year:
+                del SIG_SAMPLE_MAP2[key][secondkey]
+    for key in BKG_SAMPLE_MAP:
+        for secondkey in BKG_SAMPLE_MAP[key]:
+            if secondkey!=args.year:
+                del BKG_SAMPLE_MAP2[key][secondkey]
+    # Get Cutflow objects for background samples
+    bkg_cutflows = merge(output_dir, BKG_SAMPLE_MAP2, n_hadders=args.n_workers, outfolder=f"Run2_{args.year}")
+    cutflows = bkg_cutflows
+    cutflows["TotalBkg"] = bkg_cutflows.sum()
+    # Get Cutflow objects for signal samples
+    sig_cutflows = merge(output_dir, SIG_SAMPLE_MAP2, n_hadders=args.n_workers, outfolder=f"Run2_{args.year}")
+    cutflows += sig_cutflows
+    cutflows["VBSVVH"] = sig_cutflows.sum()
+    cutflows.reorder(["QCD", "TTHad", "TT1L", "TTW", "TTH", "SingleTop", "Bosons", "TotalBkg", "SSVBSWWH", "OSVBSWWH", "VBSWZH", "VBSZZH", "VBSVVH"])
+
+    # Write .cflow files
+    for group_name, cutflow in cutflows.items():
+        cutflow.write_cflow(f"{output_dir}/Run2_{args.year}/{group_name}_cutflow.cflow")
+    # Write CSV
+    terminal_cut_name = "AllMerged_RegionA"
+    cutflows.write_csv(f"{output_dir}/Run2_{args.year}/cutflow_{terminal_cut_name}.csv", terminal_cut_name)
+    cutflows.write_txt(f"{output_dir}/Run2_{args.year}/cutflow_{terminal_cut_name}.txt", terminal_cut_name)
+
+    # Merge data samples and DO NOT save Cutflow object
+    merge(output_dir, OTHER_SAMPLE_MAP2, n_hadders=args.n_workers, outfolder=f"Run2_{args.year}")

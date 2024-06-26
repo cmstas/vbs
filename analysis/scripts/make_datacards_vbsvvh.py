@@ -99,6 +99,7 @@ if __name__ == "__main__":
     cli.add_argument("--private", action="store_true", help="Make datacards from private signal samples")
     cli.add_argument("--allmerged", action="store_true", help="Make datacards for all-merged analysis")
     cli.add_argument("--semimerged", action="store_true", help="Make datacards for semi-merged analysis")
+    cli.add_argument("--dir", type=str, default="Run2", help="Year")
     args = cli.parse_args()
 
     CHANNEL = ""
@@ -120,10 +121,12 @@ if __name__ == "__main__":
         SIGNAL_NAME = "VBSVVH"
 
     output_dir = f"../combine/vbsvvh/datacards/{SIGNAL_NAME}_{CHANNEL}_{args.tag}"
+    if(args.dir!="Run2"):
+        output_dir=output_dir+"_"+args.dir
     os.makedirs(output_dir, exist_ok=True)
 
     # Find babies
-    babies = glob.glob(f"{BABYDIR}/Run2/*.root")
+    babies = glob.glob(f"{BABYDIR}/{args.dir}/*.root")
     sig_babies = []
     bkg_babies = []
     data_babies = []
@@ -144,7 +147,7 @@ if __name__ == "__main__":
     print("\n".join(data_babies))
 
     if not sig_babies or not bkg_babies or not data_babies:
-        print(f"Missing some (or all) babies! Looking for {BABYDIR}/Run2/*.root")
+        print(f"Missing some (or all) babies! Looking for {BABYDIR}/{args.dir}/*.root")
         exit()
 
     # Load babies
@@ -210,7 +213,7 @@ if __name__ == "__main__":
     ABCD_REGIONS = ["regionA", "regionB", "regionC", "regionD"]
 
     # Load reweights
-    with uproot.open(f"{BABYDIR}/Run2/{SIGNAL_NAME}.root") as f:
+    with uproot.open(f"{BABYDIR}/{args.dir}/{SIGNAL_NAME}.root") as f:
         rwgt_tree = f["rwgt_tree"].arrays(library="np")
         reweights = np.stack(rwgt_tree["reweights"][rwgt_tree[f"is_{CHANNEL}"]])
         # Insert trivial reweight for central value (C2V = 2)
@@ -247,7 +250,7 @@ if __name__ == "__main__":
                 
         pdf_ratio = pdf_sum/gen_sum
 
-        with uproot.open(f"{BABYDIR}/Run2/{SIGNAL_NAME}.root") as f:
+        with uproot.open(f"{BABYDIR}/{args.dir}/{SIGNAL_NAME}.root") as f:
             pdf_df = f.get("pdf_tree").arrays(library="pd")
             pdf_df = pdf_df[pdf_df[f"is_{CHANNEL}"]].reset_index()
             
@@ -399,9 +402,9 @@ if __name__ == "__main__":
             if "YEAR" in jec_source:
                 for year in ["2016postVFP", "2016preVFP", "2017", "2018"]:
                     jec_systs = get_jet_energy_systs(
-                        f"{BABYDIR}/Run2/VBSVVH_cutflow.cflow",
-                        f"{BABYDIR}_jec_{jec_i+1}_{year}_up/Run2/VBSVVH_cutflow.cflow",
-                        f"{BABYDIR}_jec_{jec_i+1}_{year}_dn/Run2/VBSVVH_cutflow.cflow",
+                        f"{BABYDIR}/{args.dir}/VBSVVH_cutflow.cflow",
+                        f"{BABYDIR}_jec_{jec_i+1}_{year}_up/{args.dir}/VBSVVH_cutflow.cflow",
+                        f"{BABYDIR}_jec_{jec_i+1}_{year}_dn/{args.dir}/VBSVVH_cutflow.cflow",
                         {
                             "regionA": "AllMerged_RegionA",
                             "regionB": "AllMerged_RegionB",
@@ -413,9 +416,9 @@ if __name__ == "__main__":
                     SIG_SYSTS_LIMIT.add_row(jec_systs)
             else:
                 jec_systs = get_jet_energy_systs(
-                    f"{BABYDIR}/Run2/VBSVVH_cutflow.cflow",
-                    f"{BABYDIR}_jec_{jec_i+1}_up/Run2/VBSVVH_cutflow.cflow",
-                    f"{BABYDIR}_jec_{jec_i+1}_dn/Run2/VBSVVH_cutflow.cflow",
+                    f"{BABYDIR}/{args.dir}/VBSVVH_cutflow.cflow",
+                    f"{BABYDIR}_jec_{jec_i+1}_up/{args.dir}/VBSVVH_cutflow.cflow",
+                    f"{BABYDIR}_jec_{jec_i+1}_dn/{args.dir}/VBSVVH_cutflow.cflow",
                     {
                         "regionA": "AllMerged_RegionA",
                         "regionB": "AllMerged_RegionB",
@@ -430,9 +433,9 @@ if __name__ == "__main__":
 
         # -- Jet energy resolution uncertainty -------------------------------------------------
         jer_systs = get_jet_energy_systs(
-            f"{BABYDIR}/Run2/VBSVVH_cutflow.cflow",
-            f"{BABYDIR}_jer_up/Run2/VBSVVH_cutflow.cflow",
-            f"{BABYDIR}_jer_dn/Run2/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}/{args.dir}/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jer_up/{args.dir}/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jer_dn/{args.dir}/VBSVVH_cutflow.cflow",
             {
                 "regionA": "AllMerged_RegionA",
                 "regionB": "AllMerged_RegionB",
@@ -447,9 +450,9 @@ if __name__ == "__main__":
 
         # -- Jet energy resolution uncertainty -------------------------------------------------
         jmr_systs = get_jet_energy_systs(
-            f"{BABYDIR}/Run2/VBSVVH_cutflow.cflow",
-            f"{BABYDIR}_jmr_up/Run2/VBSVVH_cutflow.cflow",
-            f"{BABYDIR}_jmr_dn/Run2/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}/{args.dir}/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jmr_up/{args.dir}/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jmr_dn/{args.dir}/VBSVVH_cutflow.cflow",
             {
                 "regionA": "AllMerged_RegionA",
                 "regionB": "AllMerged_RegionB",
@@ -461,9 +464,9 @@ if __name__ == "__main__":
         SIG_SYSTS_LIMIT.add_row(jmr_systs)
         # --------------------------------------------------------------------------------------
         jms_systs = get_jet_energy_systs(
-            f"{BABYDIR}/Run2/VBSVVH_cutflow.cflow",
-            f"{BABYDIR}_jms_up/Run2/VBSVVH_cutflow.cflow",
-            f"{BABYDIR}_jms_dn/Run2/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}/{args.dir}/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jms_up/{args.dir}/VBSVVH_cutflow.cflow",
+            f"{BABYDIR}_jms_dn/{args.dir}/VBSVVH_cutflow.cflow",
             {
                 "regionA": "AllMerged_RegionA",
                 "regionB": "AllMerged_RegionB",

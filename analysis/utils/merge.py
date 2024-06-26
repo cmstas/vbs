@@ -9,7 +9,7 @@ def hadd_job(split_cmd):
     hadd = Popen(split_cmd, stdout=PIPE, stderr=PIPE)
     hadd.wait()
 
-def merge(output_dir, sample_map, n_hadders=8):
+def merge(output_dir, sample_map, n_hadders=8, outfolder="Run2"):
     # Collect cutflows and stage merge jobs
     hadd_cmds = []
     merged_cutflows = {}
@@ -32,7 +32,7 @@ def merge(output_dir, sample_map, n_hadders=8):
             if len(groups[year]) == 0:
                 print(f"WARNING: {year} for {group_name} has no files!")
         # Stage merge (hadd) jobs
-        output_file = f"{output_dir}/Run2/{group_name}.root"
+        output_file = f"{output_dir}/{outfolder}/{group_name}.root"
         hadd_cmds.append(["hadd", output_file] + root_files_to_merge)
         if os.path.exists(output_file):
             os.remove(output_file)
