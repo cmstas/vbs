@@ -154,6 +154,18 @@ public:
             veto_lep_jet_idxs.push_back(nt.Muon_jetIdx().at(i));
         }
 
+	//count genlevel leptons
+	int ngenlep=0;
+	if(!nt.isData()){
+	for (unsigned int i = 0; i < nt.nGenPart(); ++i){
+	    if( abs(nt.GenPart_pdgId().at(i))==13 && 
+                abs(nt.GenPart_eta().at(i))<2.4) ngenlep+=1;
+            if( abs(nt.GenPart_pdgId().at(i))==11 && 
+                abs(nt.GenPart_eta().at(i))<2.5)  ngenlep+=1;
+
+	}}
+	arbol.setLeaf<int>("ngenlep", ngenlep);
+
         globals.setVal<LorentzVectors>("veto_lep_p4s", veto_lep_p4s);
         globals.setVal<Integers>("veto_lep_pdgIDs", veto_lep_pdgIDs);
         globals.setVal<Integers>("veto_lep_idxs", veto_lep_idxs);
@@ -588,7 +600,7 @@ public:
 
         arbol.setLeaf<int>("n_fatjets", good_fatjet_p4s.size());
         arbol.setLeaf<double>("HT_fat", ht);
-
+       
         return true;
     };
 };
@@ -686,6 +698,69 @@ public:
         arbol.setLeaf<double>("deta_jj", ld_vbsjet_p4.eta() - tr_vbsjet_p4.eta());
         arbol.setLeaf<double>("abs_deta_jj", fabs(ld_vbsjet_p4.eta() - tr_vbsjet_p4.eta()));
         arbol.setLeaf<double>("dR_jj", ROOT::Math::VectorUtil::DeltaR(ld_vbsjet_p4, tr_vbsjet_p4));
+
+
+        //count genlevel leptons
+        //LorentzVectors good_jet_p4s = globals.getVal<LorentzVectors>("good_jet_p4s");
+        LorentzVectors good_fatjet_p4s = globals.getVal<LorentzVectors>("good_fatjet_p4s");
+        LorentzVectors veto_lep_p4s = globals.getVal<LorentzVectors>("veto_lep_p4s");
+        int ngenlep2=0;
+	int ngenlep3=0;
+        if(!nt.isData()){
+        for (unsigned int i = 0; i < nt.nGenPart(); ++i){
+
+            int motherindex=nt.GenPart_genPartIdxMother().at(i);
+	    bool fromWZ=false;
+	    if(motherindex>=0){
+	      if (abs(nt.GenPart_pdgId().at(motherindex))==24 && nt.GenPart_status().at(motherindex)==62) fromWZ=true;
+	      if (abs(nt.GenPart_pdgId().at(motherindex))==23 && nt.GenPart_status().at(motherindex)==62) fromWZ=true;
+	      if (abs(nt.GenPart_pdgId().at(motherindex))==15) {
+		  while(nt.GenPart_genPartIdxMother().at(motherindex)>=0 && abs(nt.GenPart_pdgId().at(motherindex))==15){
+		  motherindex=nt.GenPart_genPartIdxMother().at(motherindex);
+	          if(motherindex>=0){
+                    if (abs(nt.GenPart_pdgId().at(motherindex))==24 && nt.GenPart_status().at(motherindex)==62) fromWZ=true;
+		    if (abs(nt.GenPart_pdgId().at(motherindex))==23 && nt.GenPart_status().at(motherindex)==62) fromWZ=true;
+	          }
+	       }}
+	    }
+	    if( abs(nt.GenPart_pdgId().at(i))==13 && abs(nt.GenPart_eta().at(i))<2.4 && nt.GenPart_status().at(i)==1 && fromWZ) ngenlep3+=1;
+	    if( abs(nt.GenPart_pdgId().at(i))==11 && abs(nt.GenPart_eta().at(i))<2.5 && nt.GenPart_status().at(i)==1 && fromWZ) ngenlep3+=1;
+	    
+            bool is_overlap=false;
+            for (auto& lep_p4 : veto_lep_p4s)
+            {
+                if (ROOT::Math::VectorUtil::DeltaR(lep_p4, nt.GenPart_p4().at(i)) < 0.2)
+                {
+                    is_overlap = true;
+                    break;
+                }
+            }
+            for (auto& lep_p4 : good_fatjet_p4s)
+            {
+                if (ROOT::Math::VectorUtil::DeltaR(lep_p4, nt.GenPart_p4().at(i)) < 0.8)
+                {
+                    is_overlap = true;
+                    break;
+                }
+            }
+            for (auto& lep_p4 : good_jet_p4s)
+            {
+                if (ROOT::Math::VectorUtil::DeltaR(lep_p4, nt.GenPart_p4().at(i)) < 0.4)
+                {
+                    is_overlap = true;
+                    break;
+                }
+            }
+            if( abs(nt.GenPart_pdgId().at(i))==13 && abs(nt.GenPart_eta().at(i))<2.4 && nt.GenPart_status().at(i)==1 && fromWZ && !is_overlap) ngenlep2+=1;
+	    if( abs(nt.GenPart_pdgId().at(i))==11 && abs(nt.GenPart_eta().at(i))<2.4 && nt.GenPart_status().at(i)==1 && fromWZ && !is_overlap) ngenlep2+=1;
+            
+
+
+
+        }}
+	arbol.setLeaf<int>("ngenlep3", ngenlep3);
+        arbol.setLeaf<int>("ngenlep2", ngenlep2);
+
 
         return true;
     };

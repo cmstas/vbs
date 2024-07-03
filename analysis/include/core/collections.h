@@ -170,6 +170,10 @@ struct Analysis
         arbol.newBranch<float>("ps_isr1p0_fsr2p0", -999);
         arbol.newBranch<float>("ps_isr0p5_fsr1p0", -999);
         arbol.newBranch<float>("ps_isr1p0_fsr0p5", -999);
+        //gencount check
+	arbol.newBranch<int>("ngenlep", -999);
+	arbol.newBranch<int>("ngenlep2", -999);
+	arbol.newBranch<int>("ngenlep3", -999);
     };
 
     virtual void init()
