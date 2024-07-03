@@ -493,7 +493,7 @@ class PandasPlotter:
         bkg_counts = bkg_hist.counts.copy()
         bkg_counts[bkg_counts == 0] = 1e-12
         # Find bins to automatically blind
-        autoblind_bins = (bkg_counts + sig_hist.counts > bkg_counts + 0.2*bkg_hist.errors)
+        autoblind_bins = (bkg_counts + sig_hist.counts/sig_scale > bkg_counts + 0.2*bkg_hist.errors)
         # Do automatic blinding
         if autoblind:
             data_hist.counts[autoblind_bins] = 0

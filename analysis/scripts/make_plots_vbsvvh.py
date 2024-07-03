@@ -301,7 +301,7 @@ def opt_plots(plotter, plots_dir, channel):
             ("abcdnet_score", np.linspace(0, 1, nbins+1), r"ABCDNet score"), 
         ]
         plotter.plot_many_sig_vs_bkg(
-            col_bins_label_tuples, selection="presel", legend_ncol=2
+            col_bins_label_tuples, selection="presel", legend_ncol=2, sig_scale=100
         )
         # --------------------------------
 
@@ -385,7 +385,7 @@ def val_plots(plotter, plots_dir, channel):
             ("tr_vqqfatjet_eta", np.linspace(-2.5, 2.5, nbins+1), r"$\eta($tr $V\rightarrow qq)$"),
         ]
         plotter.plot_many_data_vs_mc(
-            col_bins_label_tuples, selection="objsel", 
+            col_bins_label_tuples, selection="objsel",sig_scale=100,
             legend_loc="upper right", legend_ncol=2, autoblind=True, logy=True, hist_ylim=[1e-2, 1e10]
         )
 
