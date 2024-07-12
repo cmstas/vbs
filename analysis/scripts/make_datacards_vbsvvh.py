@@ -159,6 +159,7 @@ if __name__ == "__main__":
         weight_columns=[
             "xsec_sf", 
             "pu_sf",
+            "puid_sf",
             "prefire_sf",
             "xwqq_ld_vqq_sf",
             "xwqq_tr_vqq_sf",
