@@ -238,18 +238,6 @@ if __name__ == "__main__":
             skim_files = glob.glob(f"/data/userdata/{os.getenv('USER')}/nanoaod/VBSVVHSkim/sig_0lep_2ak4_2ak8_ttH/Private_C2W_C2Z_*/merged.root")
         else:
             skim_files = glob.glob(f"/data/userdata/{os.getenv('USER')}/nanoaod/VBSVVHSkim/sig_0lep_2ak4_2ak8_ttH/VBS*central/merged.root")
-        gen_sum = 0
-        pdf_sum = np.zeros(101)
-        for skim_file in skim_files:
-            with uproot.open(skim_file) as f:
-                gen_sums = f["Runs"]["genEventSumw"].array(library="np")
-                pdf_sums = f["Runs"]["LHEPdfSumw"].array(library="np")
-                missed = np.array([len(s) != 101 for s in pdf_sums])
-                reshaped = np.vstack(pdf_sums[~missed])
-                pdf_sum += np.dot(gen_sums[~missed], reshaped) + np.sum(gen_sums[missed])
-                gen_sum += np.sum(gen_sums)
-                
-        pdf_ratio = pdf_sum/gen_sum
 
         with uproot.open(f"{BABYDIR}/{args.dir}/{SIGNAL_NAME}.root") as f:
             pdf_df = f.get("pdf_tree").arrays(library="pd")
@@ -258,14 +246,12 @@ if __name__ == "__main__":
         systs = []
         for R in ABCD_REGIONS:
             sig_df = vbsvvh.sig_df().reset_index()
-            count = np.sum(sig_df[sig_df[R]].event_weight*pdf_df[sig_df[R]].lhe_pdf_0)
-            deltas = []
-            for i in range(1, 101):
-                count_var = np.sum(sig_df[sig_df[R]].event_weight*pdf_df[sig_df[R]][f"lhe_pdf_{i}"])
-                deltas.append(count - count_var/pdf_ratio[i])
-
-            deltas = np.array(deltas)
-            systs.append(np.sqrt(np.sum(deltas**2))/count)
+            PDFUncValue = 0
+            count=np.sum(sig_df[sig_df[R]].event_weight)
+            up=np.sum(sig_df[sig_df[R]].event_weight+sig_df[sig_df[R]].event_weight*pdf_df[sig_df[R]][f"lhe_pdf_unc"])
+            down=np.sum(sig_df[sig_df[R]].event_weight-sig_df[sig_df[R]].event_weight*pdf_df[sig_df[R]][f"lhe_pdf_unc"])
+            delta=max(abs(count-up),abs(count-down))
+            systs.append(delta/count)
 
         pdf_systs = Systematic("CMS_LHE_weights_pdf_vbsvvh", ABCD_REGIONS)
         pdf_systs.add_systs(systs)
@@ -366,6 +352,25 @@ if __name__ == "__main__":
             SIG_SYSTS_LIMIT.add_row(xbb_sf_systs)
         # --------------------------------------------------------------------------------------
 
+        # -- EXTRA ------------------------------------------------------------------------
+        valuesbbfit=[0.0175,0.0356,0.0250,0.0182]
+        if(args.dir=="Run2_2018"): valuesbbfit=[0.0175,0.0,0.0,0.0]
+        if(args.dir=="Run2_2017"): valuesbbfit=[0.0,0.0356,0.0,0.0]
+        if(args.dir=="Run2_2016postVFP"): valuesbbfit=[0.0,0.0,0.0250,0.0]
+        if(args.dir=="Run2_2016preVFP"): valuesbbfit=[0.0,0.0,0.0,0.0182]
+
+        lumi_systs = Systematic("CMS_vbsvvhjets_bTagXbbFit_13TeV_18", ABCD_REGIONS)
+        lumi_systs.add_systs([valuesbbfit[0] for R in ABCD_REGIONS])
+        SIG_SYSTS_LIMIT.add_row(lumi_systs)
+        lumi_systs = Systematic("CMS_vbsvvhjets_bTagXbbFit_13TeV_17", ABCD_REGIONS)
+        lumi_systs.add_systs([valuesbbfit[1] for R in ABCD_REGIONS])
+        SIG_SYSTS_LIMIT.add_row(lumi_systs)
+        lumi_systs = Systematic("CMS_vbsvvhjets_bTagXbbFit_13TeV_16postVFP", ABCD_REGIONS)
+        lumi_systs.add_systs([valuesbbfit[2] for R in ABCD_REGIONS])
+        SIG_SYSTS_LIMIT.add_row(lumi_systs)
+        lumi_systs = Systematic("CMS_vbsvvhjets_bTagXbbFit_13TeV_16preVFP", ABCD_REGIONS)
+        lumi_systs.add_systs([valuesbbfit[3] for R in ABCD_REGIONS])
+        SIG_SYSTS_LIMIT.add_row(lumi_systs)
 
         # -- ParticleNet XWqq scale factors -----------------------------------------------------
         for year in [-2016, 2016, 2017, 2018]:
@@ -495,7 +500,7 @@ if __name__ == "__main__":
 
         datacard_systs = {
             "TotalBkg_AllHad": {
-                "CMS_vbsvvhjets_abcd_syst": [1 + 25.4/100],
+                "CMS_vbsvvhjets_abcd_syst": [1 + 18./100],
                 # "CMS_vbsvvhjets_abcd_stat": [1 + 34.0/100]
             },
             "TotalSig": {}

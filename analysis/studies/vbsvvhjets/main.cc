@@ -9,6 +9,7 @@
 #include "Math/VectorUtil.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "math.h"
 // NanoCORE
 #include "Nano.h"
 #include "Config.h"
@@ -31,6 +32,7 @@ int main(int argc, char** argv)
     {
         pdf_arbol.newBranch<double>("lhe_pdf_"+std::to_string(i), -999);
     }
+    pdf_arbol.newBranch<double>("lhe_pdf_unc", -999);
     pdf_arbol.newBranch<double>("event_weight", -999);
     pdf_arbol.newBranch<bool>("is_allmerged", false);
     pdf_arbol.newBranch<bool>("is_semimerged", false);
@@ -187,18 +189,21 @@ int main(int argc, char** argv)
         [&]()
         {
             if (nt.isData()) { return true; }
+	    float unc=0.0;
             for (int i = 0; i < 101; ++i)
             {
                 TString branch_name = "lhe_pdf_"+std::to_string(i);
                 if (nt.nLHEPdfWeight() >= 101)
                 {
                     pdf_arbol.setLeaf<double>(branch_name, nt.LHEPdfWeight().at(i));
+		    unc+=(1-nt.LHEPdfWeight().at(i))*(1-nt.LHEPdfWeight().at(i));
                 }
                 else
                 {
                     pdf_arbol.setLeaf<double>(branch_name, 1.);
                 }
             }
+	    pdf_arbol.setLeaf<double>("lhe_pdf_unc",  TMath::Sqrt(unc));
             pdf_arbol.setLeaf<bool>("is_allmerged", arbol.getLeaf<bool>("is_allmerged"));
             pdf_arbol.setLeaf<bool>("is_semimerged", arbol.getLeaf<bool>("is_semimerged"));
             return true;
@@ -217,10 +222,19 @@ int main(int argc, char** argv)
             TString file_name = cli.input_tchain->GetCurrentFile()->GetName();
             if (file_name.Contains("VBSWWH") || file_name.Contains("VBSWZH") || file_name.Contains("VBSZZH"))
             {
-                Doubles reweights;
+                //Doubles reweights;
+                //for (auto reweight : nt.LHEReweightingWeight())
+                //{
+                //    reweights.push_back(reweight);
+                //}
+                //this is just the reweight part
+                vector<double> reweights(120, 0.0);
+                int iii=0;
                 for (auto reweight : nt.LHEReweightingWeight())
-                {
-                    reweights.push_back(reweight);
+                {   
+                   reweights[iii]=reweight;
+                   iii++;
+                   if (iii>=120) break;
                 }
                 rwgt_arbol.setLeaf<Doubles>("reweights", reweights);
                 rwgt_arbol.setLeaf<bool>("is_allmerged", arbol.getLeaf<bool>("is_allmerged"));
