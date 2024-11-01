@@ -303,6 +303,9 @@ def opt_plots(plotter, plots_dir, channel):
         plotter.plot_many_sig_vs_bkg(
             col_bins_label_tuples, selection="presel", legend_ncol=2, sig_scale=100
         )
+        plotter.plot_many_sig_vs_bkg(
+             col_bins_label_tuples, selection="presel", legend_ncol=2, sig_scale=1, logy=True
+        )
         # --------------------------------
 
         # --- Plots after ParticleNet cuts ---
@@ -406,11 +409,18 @@ def extra_plots(plotter, plots_dir, channel):
         # Apply ParticleNet scale factors
         plotter.df.event_weight *= plotter.df.xbb_sf*plotter.df.xwqq_ld_vqq_sf*plotter.df.xwqq_tr_vqq_sf
 
-        cuts = "abcdnet_score > 0.89 and abs_deta_jj > 5.0 and ld_vqqfatjet_xwqq > 0.8 and tr_vqqfatjet_xwqq > 0.7 and hbbfatjet_xbb > 0.8".split(" and ")
+        cuts = "abcdnet_score > 0.97 and abs_deta_jj > 5.0 and ld_vqqfatjet_xwqq > 0.8 and tr_vqqfatjet_xwqq > 0.7 and hbbfatjet_xbb > 0.8".split(" and ")
         x_arm = cuts[0]
         y_arm = cuts[1]
         presel = cuts[2:]
 
+        #['ld_vqqfatjet_xwqq > 0.8', 'tr_vqqfatjet_xwqq > 0.7', 'hbbfatjet_xbb > 0.8']
+        #hbbfatjet_xbb > 0.5 and ld_vqqfatjet_xwqq > 0.3 and tr_vqqfatjet_xwqq > 0.3
+        alt_presel1=['ld_vqqfatjet_xwqq > 0.3', 'tr_vqqfatjet_xwqq > 0.7', 'hbbfatjet_xbb > 0.8', 'ld_vqqfatjet_xwqq < 0.8', 'tr_vqqfatjet_xwqq < 0.95', 'hbbfatjet_xbb < 0.95']
+        alt_presel2=['ld_vqqfatjet_xwqq > 0.8', 'tr_vqqfatjet_xwqq > 0.3', 'hbbfatjet_xbb > 0.8', 'tr_vqqfatjet_xwqq < 0.7', 'ld_vqqfatjet_xwqq < 0.95', 'hbbfatjet_xbb < 0.95']
+        alt_presel3=['ld_vqqfatjet_xwqq > 0.8', 'tr_vqqfatjet_xwqq > 0.7', 'hbbfatjet_xbb > 0.5', 'hbbfatjet_xbb < 0.8', 'tr_vqqfatjet_xwqq < 0.95', 'ld_vqqfatjet_xwqq < 0.95']
+
+       
         # How to sub-divide the control regions for closure tests
         x_mid = "abcdnet_score > 0.4"
         y_mid = "abs_deta_jj > 2.5"
@@ -429,6 +439,19 @@ def extra_plots(plotter, plots_dir, channel):
         D3 = " and ".join([f"(not {x_mid}) and (not {x_arm})", f"({y_mid}) and (not {y_arm})", *presel])
         D4 = " and ".join([f"(not {x_mid}) and (not {x_arm})", f"(not {y_mid}) and (not {y_arm})", *presel])
 
+        Aalt1 = " and ".join([x_arm, y_arm, *alt_presel1])
+        Balt1 = " and ".join([x_arm, f"(not {y_arm})", *alt_presel1])
+        Calt1 = " and ".join([f"(not {x_arm})", y_arm, *alt_presel1])
+        Dalt1 = " and ".join([f"(not {x_arm})", f"(not {y_arm})", *alt_presel1])
+        Aalt2 = " and ".join([x_arm, y_arm, *alt_presel2])
+        Balt2 = " and ".join([x_arm, f"(not {y_arm})", *alt_presel2])
+        Calt2 = " and ".join([f"(not {x_arm})", y_arm, *alt_presel2])
+        Dalt2 = " and ".join([f"(not {x_arm})", f"(not {y_arm})", *alt_presel2])
+        Aalt3 = " and ".join([x_arm, y_arm, *alt_presel3])
+        Balt3 = " and ".join([x_arm, f"(not {y_arm})", *alt_presel3])
+        Calt3 = " and ".join([f"(not {x_arm})", y_arm, *alt_presel3])
+        Dalt3 = " and ".join([f"(not {x_arm})", f"(not {y_arm})", *alt_presel3])
+
         plot_abcd(x_arm, y_arm, y_lim=[0, 10], y_label=r"$|\Delta\eta_{jj}|$", presel_cuts=presel, plots_dir=plots_dir)
         plot_abcd(x_arm, y_arm, x_mid=x_mid, y_lim=[0, 10], y_label=r"$|\Delta\eta_{jj}|$", presel_cuts=presel, plots_dir=plots_dir)
         plot_abcd(x_arm, y_arm, x_mid=x_mid, y_mid=y_mid, y_lim=[0, 10], y_label=r"$|\Delta\eta_{jj}|$", presel_cuts=presel, plots_dir=plots_dir)
@@ -436,7 +459,7 @@ def extra_plots(plotter, plots_dir, channel):
         # A = B*C/D
         get_abcd(plotter, regions=[A, B, C, D], names=["A", "B", "C", "D"], plots_dir=plots_dir)
         # B1 = B2*D1/D2
-        get_abcd(plotter, regions=[B1, B2, D1, D2], names=["B1", "B2", "D1", "D2"], plots_dir=plots_dir)
+        #get_abcd(plotter, regions=[B1, B2, D1, D2], names=["B1", "B2", "D1", "D2"], plots_dir=plots_dir)
         # D1 = D2*D3/D4
         get_abcd(plotter, regions=[D1, D2, D3, D4], names=["D1", "D2", "D3", "D4"], plots_dir=plots_dir)
         # C1 = D1*C2/D3
@@ -445,6 +468,11 @@ def extra_plots(plotter, plots_dir, channel):
         get_abcd(plotter, regions=[A, B, C1, f"({D1}) or ({D2})"], names=["A", "B", "C1", "D12"], plots_dir=plots_dir)
         # C1 = D1*C2/D2
         get_abcd(plotter, regions=[C1, f"({D1}) or ({D2})", C2, f"({D3}) or ({D4})"], names=["C1", "D12", "C2", "D34"], plots_dir=plots_dir)
+
+        #alt score cuts
+        get_abcd(plotter, regions=[Aalt1,Balt1,Calt1,Dalt1], names=["A ld Xqq inv.", "B ld Xqq inv.", "C ld Xqq inv.", "D ld Xqq inv."], plots_dir=plots_dir)
+        get_abcd(plotter, regions=[Aalt2,Balt2,Calt2,Dalt2], names=["A tr Xqq inv.", "B tr Xqq inv.", "C tr Xqq inv.", "D tr Xqq inv."], plots_dir=plots_dir)
+        get_abcd(plotter, regions=[Aalt3,Balt3,Calt3,Dalt3], names=["A Xbb inv.", "B Xbb inv.", "C Xbb inv.", "D Xbb inv."], plots_dir=plots_dir)
 
         # Reset event weights
         plotter.df.event_weight = orig_event_weight
@@ -470,7 +498,7 @@ if __name__ == "__main__":
         channel = "allmerged"
 
     baby_dir = f"/data/userdata/{os.getenv('USER')}/vbs_studies/vbsvvhjets/output_{args.tag}"
-    base_dir = f"/home/users/{os.getenv('USER')}/public_html/vbsvvhjets_plots/{args.tag}"
+    base_dir = f"/home/users/{os.getenv('USER')}/public_html/vbsvvhjets_plots2/{args.tag}"
 
     # Collect babies
     babies = sorted(glob.glob(f"{baby_dir}/Run2/*.root"))
@@ -505,6 +533,7 @@ if __name__ == "__main__":
         weight_columns=[
             "xsec_sf", 
             "pu_sf", 
+            "puid_sf",
             "prefire_sf", 
         ],
         sample_labels = {
@@ -554,9 +583,10 @@ if __name__ == "__main__":
         if reweight_name in reweight_names:
             reweight_i = reweight_names.index(reweight_name)
             plotter.df.loc[plotter.df.is_signal & plotter.df.presel, f"reweights_{C2V_str}"] = reweights.T[reweight_i]
+            print("added the reweight", reweight_i)
         else:
             print(f"WARNING: reweight {reweight_name} not found, set to 1")
-
+        print(plotter.df.columns)
     # Make plots
     plot_all = not (args.opt or args.val or args.extra)
     if plot_all or args.opt:

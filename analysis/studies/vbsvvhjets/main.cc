@@ -222,20 +222,20 @@ int main(int argc, char** argv)
             TString file_name = cli.input_tchain->GetCurrentFile()->GetName();
             if (file_name.Contains("VBSWWH") || file_name.Contains("VBSWZH") || file_name.Contains("VBSZZH"))
             {
-                //Doubles reweights;
-                //for (auto reweight : nt.LHEReweightingWeight())
-                //{
-                //    reweights.push_back(reweight);
-                //}
-                //this is just the reweight part
-                vector<double> reweights(120, 0.0);
-                int iii=0;
+                Doubles reweights;
                 for (auto reweight : nt.LHEReweightingWeight())
-                {   
-                   reweights[iii]=reweight;
-                   iii++;
-                   if (iii>=120) break;
+                {
+                    reweights.push_back(reweight);
                 }
+                //this is just the reweight part
+                //vector<double> reweights(120, 0.0);
+                //int iii=0;
+                //for (auto reweight : nt.LHEReweightingWeight())
+                //{   
+                   //reweights[iii]=reweight;
+                   //iii++;
+                   //if (iii>=120) break;
+                //}
                 rwgt_arbol.setLeaf<Doubles>("reweights", reweights);
                 rwgt_arbol.setLeaf<bool>("is_allmerged", arbol.getLeaf<bool>("is_allmerged"));
                 rwgt_arbol.setLeaf<bool>("is_semimerged", arbol.getLeaf<bool>("is_semimerged"));

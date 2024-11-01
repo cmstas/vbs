@@ -1,3 +1,4 @@
+import scipy
 class Datacard:
     def __init__(self, obs, sig, bkg, systs):
         self.obs = obs
@@ -139,12 +140,12 @@ class DatacardABCD(Datacard):
         cw = self.column_width
         hw = self.header_width
         # Rateparams
-        up1 = self.obs[1] + 3*(self.obs[1]**0.5)
-        up2 = self.obs[2] + 3*(self.obs[2]**0.5)
-        up3 = self.obs[3] + 3*(self.obs[3]**0.5)
-        dn1 = self.obs[1] - 3*(self.obs[1]**0.5)
-        dn2 = self.obs[2] - 3*(self.obs[2]**0.5)
-        dn3 = self.obs[3] - 3*(self.obs[3]**0.5)
+        up1 = scipy.stats.gamma.ppf(1- (1-0.9973) / 2, self.obs[1]+1) #self.obs[1] + 3*(self.obs[1]**0.5)
+        up2 = scipy.stats.gamma.ppf(1- (1-0.9973) / 2, self.obs[2]+1) #self.obs[2] + 3*(self.obs[2]**0.5)
+        up3 = scipy.stats.gamma.ppf(1- (1-0.9973) / 2, self.obs[3]+1) #self.obs[3] + 3*(self.obs[3]**0.5)
+        dn1 = scipy.stats.gamma.ppf((1 - 0.9973) / 2, self.obs[1]) #self.obs[1] - 3*(self.obs[1]**0.5)
+        dn2 = scipy.stats.gamma.ppf((1 - 0.9973) / 2, self.obs[2]) #self.obs[2] - 3*(self.obs[2]**0.5)
+        dn3 = scipy.stats.gamma.ppf((1 - 0.9973) / 2, self.obs[3]) #self.obs[3] - 3*(self.obs[3]**0.5)
         self.content += f"{self.rparam_labels[0]+' rateParam':<{hw}}  A  {self.bkg_labels[0]:>{cw}} (@0*@1/@2) {','.join(self.rparam_labels[1:])}\n"
         self.content += f"{self.rparam_labels[1]+' rateParam':<{hw}}  B  {self.bkg_labels[0]:>{cw}} {self.obs[1]:>4} [{round(max(0.0, dn1))},{round(up1)}]\n"
         self.content += f"{self.rparam_labels[2]+' rateParam':<{hw}}  C  {self.bkg_labels[0]:>{cw}} {self.obs[2]:>4} [{round(max(0.0, dn2))},{round(up2)}]\n"

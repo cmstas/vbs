@@ -353,23 +353,43 @@ if __name__ == "__main__":
         # --------------------------------------------------------------------------------------
 
         # -- EXTRA ------------------------------------------------------------------------
-        valuesbbfit=[0.0175,0.0356,0.0250,0.0182]
-        if(args.dir=="Run2_2018"): valuesbbfit=[0.0175,0.0,0.0,0.0]
-        if(args.dir=="Run2_2017"): valuesbbfit=[0.0,0.0356,0.0,0.0]
-        if(args.dir=="Run2_2016postVFP"): valuesbbfit=[0.0,0.0,0.0250,0.0]
-        if(args.dir=="Run2_2016preVFP"): valuesbbfit=[0.0,0.0,0.0,0.0182]
+        valuesbbfit={}
+        valuesbbfit["2018"]=[0.0175,0.0175,0.0175,0.0175]
+        valuesbbfit["2017"]=[0.0356,0.0356,0.0356,0.0356]
+        valuesbbfit["2016"]=[0.0250,0.0250,0.0250,0.0250]
+        valuesbbfit["-2016"]=[0.0182,0.0182,0.0182,0.0182]
+        print(valuesbbfit)
+        for year in [-2016,2016,2017,2018 ]:
+            A_prop=vbsvvh.sig_count(selection="regionA and year=="+str(year))/vbsvvh.sig_count(selection="regionA")
+            B_prop=vbsvvh.sig_count(selection="regionB and year=="+str(year))/vbsvvh.sig_count(selection="regionB")
+            C_prop=vbsvvh.sig_count(selection="regionC and year=="+str(year))/vbsvvh.sig_count(selection="regionC")
+            D_prop=vbsvvh.sig_count(selection="regionD and year=="+str(year))/vbsvvh.sig_count(selection="regionD")
+            print(A_prop,B_prop,C_prop,D_prop)
+            valuesbbfit[str(year)][0]=valuesbbfit[str(year)][0]*float(A_prop)
+            valuesbbfit[str(year)][1]=valuesbbfit[str(year)][1]*float(B_prop)
+            valuesbbfit[str(year)][2]=valuesbbfit[str(year)][2]*float(C_prop)
+            valuesbbfit[str(year)][3]=valuesbbfit[str(year)][3]*float(D_prop)
+        
+        #ABCD_REGIONS = ["regionA", "regionB", "regionC", "regionD"]
+
+        #if(args.dir=="Run2_2018"): valuesbbfit=[0.0175,0.0,0.0,0.0]
+        #if(args.dir=="Run2_2017"): valuesbbfit=[0.0,0.0356,0.0,0.0]
+        #if(args.dir=="Run2_2016postVFP"): valuesbbfit=[0.0,0.0,0.0250,0.0]
+        #if(args.dir=="Run2_2016preVFP"): valuesbbfit=[0.0,0.0,0.0,0.0182]i
+        print(valuesbbfit)
+        #quit()
 
         lumi_systs = Systematic("CMS_vbsvvhjets_bTagXbbFit_13TeV_18", ABCD_REGIONS)
-        lumi_systs.add_systs([valuesbbfit[0] for R in ABCD_REGIONS])
+        lumi_systs.add_systs([valuesbbfit["2018"][i] for i, R in enumerate(ABCD_REGIONS)])
         SIG_SYSTS_LIMIT.add_row(lumi_systs)
         lumi_systs = Systematic("CMS_vbsvvhjets_bTagXbbFit_13TeV_17", ABCD_REGIONS)
-        lumi_systs.add_systs([valuesbbfit[1] for R in ABCD_REGIONS])
+        lumi_systs.add_systs([valuesbbfit["2017"][i] for i, R in enumerate(ABCD_REGIONS)])
         SIG_SYSTS_LIMIT.add_row(lumi_systs)
         lumi_systs = Systematic("CMS_vbsvvhjets_bTagXbbFit_13TeV_16postVFP", ABCD_REGIONS)
-        lumi_systs.add_systs([valuesbbfit[2] for R in ABCD_REGIONS])
+        lumi_systs.add_systs([valuesbbfit["2016"][i] for i, R in enumerate(ABCD_REGIONS)])
         SIG_SYSTS_LIMIT.add_row(lumi_systs)
         lumi_systs = Systematic("CMS_vbsvvhjets_bTagXbbFit_13TeV_16preVFP", ABCD_REGIONS)
-        lumi_systs.add_systs([valuesbbfit[3] for R in ABCD_REGIONS])
+        lumi_systs.add_systs([valuesbbfit["-2016"][i] for i, R in enumerate(ABCD_REGIONS)])
         SIG_SYSTS_LIMIT.add_row(lumi_systs)
 
         # -- ParticleNet XWqq scale factors -----------------------------------------------------
@@ -500,7 +520,7 @@ if __name__ == "__main__":
 
         datacard_systs = {
             "TotalBkg_AllHad": {
-                "CMS_vbsvvhjets_abcd_syst": [1 + 18./100],
+                "CMS_vbsvvhjets_abcd_syst": [1 + 30./100],
                 # "CMS_vbsvvhjets_abcd_stat": [1 + 34.0/100]
             },
             "TotalSig": {}

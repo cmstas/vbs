@@ -97,7 +97,9 @@ class PandasPlotter:
             self.bkg_colors = {name: self.colors[i] for i, name in enumerate(bkg_names)}
         else:
             self.bkg_colors = {}
-
+        
+        print("RWWW", self.sig_reweights)
+        
     @staticmethod
     def get_selection_str(selection):
         selection = selection.replace(" ", "_")
@@ -348,6 +350,15 @@ class PandasPlotter:
             extra_weights=extra_weights, raw=raw, norm=norm, scale=sig_scale
         )
 
+        sig_hist2 = self.sig_hist(
+            column, bins, selection=selection, transf=transf,
+            extra_weights=["reweights_1p5"], raw=raw, norm=norm, scale=sig_scale, color="b"
+        )
+        sig_hist3 = self.sig_hist(
+            column, bins, selection=selection, transf=transf,
+            extra_weights=["reweights_1p3"], raw=raw, norm=norm, scale=sig_scale, color="g"
+        )
+
         bkg_hist, bkg_stacked = self.bkg_hist(
             column, bins, selection=selection, transf=transf,
             extra_weights=extra_weights, raw=raw, norm=norm, groups=grouped_bkgs
@@ -360,6 +371,8 @@ class PandasPlotter:
         # Plot total signal and background
         bkg_hist.plot(ax=axes, alpha=0.5, log=logy)
         sig_hist.plot(ax=axes, linewidth=2, log=logy)
+        sig_hist2.plot(ax=axes, linewidth=2, log=logy)
+        sig_hist3.plot(ax=axes, linewidth=2, log=logy)
         for hist in extra_hists:
             hist.plot(ax=axes, linewidth=2, log=logy)
 
@@ -380,9 +393,10 @@ class PandasPlotter:
             if not logy:
                 axes.set_ylim(bottom=0)
             else:
-                hist_axes.set_ylim(bottom=0.01)
+                axes.set_ylim(bottom=0.01)
+                axes.set_ylim(top=axes.get_ylim()[1]*100)
                 if norm:
-                    hist_axes.set_ylim(top=1)
+                    axes.set_ylim(top=1)
         else:
             axes.set_ylim(bottom=ylow, top=yhigh)
             

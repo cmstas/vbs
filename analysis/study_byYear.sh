@@ -67,11 +67,11 @@ YEARS="
 for JEC in $JECS; do
     for Y in $YEARS; do
         if [ ${YEAR} == ${Y} ]; then
-             ln -s /data/userdata/legianni/vbs_studies/vbsvvhjets/output_dnc_jec_2_dn/Run2_${YEAR} /data/userdata/legianni/vbs_studies/vbsvvhjets/output_dnc_${JEC}_${Y}_dn/Run2_${YEAR}
-             ln -s /data/userdata/legianni/vbs_studies/vbsvvhjets/output_dnc_jec_2_up/Run2_${YEAR} /data/userdata/legianni/vbs_studies/vbsvvhjets/output_dnc_${JEC}_${Y}_up/Run2_${YEAR}
+             ln -s /data/userdata/legianni/vbs_studies/vbsvvhjets/output_${TAG}_${JEC}_dn/Run2_${YEAR} /data/userdata/legianni/vbs_studies/vbsvvhjets/output_${TAG}_${JEC}_${Y}_dn/Run2_${YEAR}
+             ln -s /data/userdata/legianni/vbs_studies/vbsvvhjets/output_${TAG}_${JEC}_up/Run2_${YEAR} /data/userdata/legianni/vbs_studies/vbsvvhjets/output_${TAG}_${JEC}_${Y}_up/Run2_${YEAR}
         else
-             ln -s /data/userdata/legianni/vbs_studies/vbsvvhjets/output_dnc/Run2_${YEAR} /data/userdata/legianni/vbs_studies/vbsvvhjets/output_dnc_${JEC}_${Y}_dn/Run2_${YEAR}
-             ln -s /data/userdata/legianni/vbs_studies/vbsvvhjets/output_dnc/Run2_${YEAR} /data/userdata/legianni/vbs_studies/vbsvvhjets/output_dnc_${JEC}_${Y}_up/Run2_${YEAR}
+             ln -s /data/userdata/legianni/vbs_studies/vbsvvhjets/output_${TAG}/Run2_${YEAR} /data/userdata/legianni/vbs_studies/vbsvvhjets/output_${TAG}_${JEC}_${Y}_dn/Run2_${YEAR}
+             ln -s /data/userdata/legianni/vbs_studies/vbsvvhjets/output_${TAG}/Run2_${YEAR} /data/userdata/legianni/vbs_studies/vbsvvhjets/output_${TAG}_${JEC}_${Y}_up/Run2_${YEAR}
         fi
     done
 done
