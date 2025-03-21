@@ -189,7 +189,7 @@ if __name__ == "__main__":
         data_count = vbsvvh.data_count()
         vbsvvh.df.loc[vbsvvh.df.name == "QCD", "event_weight"] *= (data_count - (bkg_count - qcd_count))/(qcd_count)
         # Define ABCD cuts
-        vbsvvh.df["abcdnet_cut"] = vbsvvh.df.eval("abcdnet_score > 0.89")
+        vbsvvh.df["abcdnet_cut"] = vbsvvh.df.eval("abcdnet_score > 0.97")
         vbsvvh.df["vbs_cut"] = vbsvvh.df.eval("abs_deta_jj > 5.0")
         vbsvvh.df["abcd_presel"] = vbsvvh.df.eval("ld_vqqfatjet_xwqq > 0.8 and tr_vqqfatjet_xwqq > 0.7 and hbbfatjet_xbb > 0.8")
     elif CHANNEL == "semimerged":
@@ -245,12 +245,18 @@ if __name__ == "__main__":
             
         systs = []
         for R in ABCD_REGIONS:
+            variations = np.zeros(101)
             sig_df = vbsvvh.sig_df().reset_index()
             PDFUncValue = 0
             count=np.sum(sig_df[sig_df[R]].event_weight)
-            up=np.sum(sig_df[sig_df[R]].event_weight+sig_df[sig_df[R]].event_weight*pdf_df[sig_df[R]][f"lhe_pdf_unc"])
-            down=np.sum(sig_df[sig_df[R]].event_weight-sig_df[sig_df[R]].event_weight*pdf_df[sig_df[R]][f"lhe_pdf_unc"])
-            delta=max(abs(count-up),abs(count-down))
+            for jj in range(101):
+                variations[jj]=np.sum(sig_df[sig_df[R]].event_weight*pdf_df[sig_df[R]][f"lhe_pdf_"+str(jj)])
+            print("count",count)
+            print("variations",variations)
+            values=(variations-count)**2
+            value=np.sum(values)
+            value=value**0.5
+            delta=value
             systs.append(delta/count)
 
         pdf_systs = Systematic("CMS_LHE_weights_pdf_vbsvvh", ABCD_REGIONS)
